@@ -13,6 +13,18 @@ Access the config page with
 
 	http://localhost:5000/config
 
+![Demo-GIF](images/OpenTokenExample.gif?raw=true "OpenToken Interceptor in action")
+
+## Configuration
+
+So far the settings have to be updated manually in the used SQLite database. It consists of three tables.
+
+![Services Table](images/table_services.png?raw=true "Services Table")
+
+![Tokens Table](images/table_tokens.png?raw=true "Tokens Table")
+
+![Users Table](images/table_users.png?raw=true "Users Table")
+
 ## Test with
 
 ### DORIS OOE WMS
