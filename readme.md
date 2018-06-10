@@ -3,6 +3,11 @@
 This proxying solution provides URLs containing UUIDs. Each UUID-URL is mapped with a service. Each UUID-URL has a specified lifetime.
 All data is stored in a SQLite database.
 
+Run with
+
+    FLASK_APP=test.py flask run
+
+
 ## Build With
 
   * Python
