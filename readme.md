@@ -9,6 +9,10 @@ Run with
 
     FLASK_APP=test.py flask run
 
+Access the config page with
+
+	http://localhost:5000/config
+
 ## Test with
 
 ### DORIS OOE WMS
