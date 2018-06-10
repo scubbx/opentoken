@@ -55,8 +55,9 @@ app = Flask(__name__)
 def hello():
     return "This is a reimplementaion of a commonly token based URL-Interceptor for HTTP services."
 
-@app.route("/<uuid:urltoken>/<path:restofquery>")
+@app.route("/ows/<uuid:urltoken>/<path:restofquery>")
 def tokenrequest(urltoken,restofquery):
+    print("Request to interceptor received.\nToken: {}\nQuery: {}".format(urltoken,restofquery))
     # lets query the information about the token from the database
     try:
         queryparameters = request.query_string.decode("utf-8")
@@ -64,17 +65,28 @@ def tokenrequest(urltoken,restofquery):
         isvalid = 'valid'
         servicedata = Services.get(Services.serviceid == tokendata.mapped_service)
         internalquery = ''.join([servicedata.url,queryparameters])
-        response = "<h1>OpenToken Interceptor</h1>This is the response to a tokenrequest. The token used was <b>{}</b>.</br> The tokendata according to the internal Interceptor-database is <b>{}</b>.</br><b>This token is {}</b>.</br>The timestamp is <b>{}</b>. This token is still valid for <b>{} seconds</b>.</br>The internal URL to which this request will be reroutet is <b>{}</b>".format(urltoken,tokendata,isvalid,tokendata.valid_until,round(tokendata.valid_until - time.time()),internalquery)
+        tokenvalidseconds = round(tokendata.valid_until - time.time())
+        response = "<h1>OpenToken Interceptor</h1>This is the response to a tokenrequest. The token used was <b>{}</b>.</br> The tokendata according to the internal Interceptor-database is <b>{}</b>.</br><b>This token is {}</b>.</br>The timestamp is <b>{}</b>. This token is still valid for <b>{} seconds</b>.</br>The internal URL to which this request will be reroutet is <b>{}</b></br>".format(urltoken,tokendata,isvalid,tokendata.valid_until,tokenvalidseconds,internalquery)
 
+        if restofquery == "info":
+            print("-> this is an INFO query")
+            return response
+        
+        if tokenvalidseconds < 0:
+            print("-> token age is too old")
+            return "<h1>OpenToken Interceptor</h1></br>This token was only valid until {}.".format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(tokendata.valid_until)))
+        
         internal_response = performInternalQuery(internalquery)
-        if request.args.get('request'):
-            if request.args.get('request').lower() == "getcapabilities":
+        if request.args.get('request') or request.args.get('REQUEST'):
+            print("-> Queryparameters: {}".format(queryparameters))
+            if 'getcapabilities' in queryparameters.lower():
                 textToReplace = str(servicedata.url.replace('?',''))
-                newText = '/'.join([ownUrl,str(urltoken),restofquery])
+                newText = '/'.join([ownUrl,"ows",str(urltoken),restofquery])
                 response = alterInternalResponse(internal_response,textToReplace,newText)
-        else:
-            response = internal_response
-
+            else:
+                print("-> directly passing through the response")
+                response = internal_response
+        
     except DoesNotExist:
         isvalid = 'invalid'
         response = "<h1>OpenToken Interceptor</h1>The token <b>{}</b> was not found in the database. The request is <b>{}</b>".format(urltoken,isvalid)
