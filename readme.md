@@ -16,6 +16,5 @@ Run with
 
 ## ToDo
 
-  * Performing the rerouted request
   * User Account management (so far the tokens and services have to be entered manually)
   * Database data in-memory buffering for faster access times (think WMTS)
